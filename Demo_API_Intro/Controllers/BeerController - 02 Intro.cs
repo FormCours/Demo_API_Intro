@@ -9,6 +9,7 @@ using System.Web.Http;
 
 namespace Demo_API_Intro.Controllers
 {
+    /*
     public class BeerController : ApiController
     {
         // Comportement naturel du routing en fonction du Protocol, le nom de l'action doit commencer par : 
@@ -16,7 +17,7 @@ namespace Demo_API_Intro.Controllers
         //  - POST   => Post, Insert, Add
         //  - PUT    => Put
         //  - PATCH  => Patch
-        //  - DELETE => Delete
+        //  - Delete => Delete
 
         // Influencer le comportement du routing à l'aide des attributs :
         //  - AcceptVerbs(...)
@@ -37,9 +38,6 @@ namespace Demo_API_Intro.Controllers
         {
             Beer beer = BeerService.Instance.Get(id);
 
-            if (beer == null)
-                return NotFound();
-
             return Json(beer);
         }
 
@@ -52,40 +50,14 @@ namespace Demo_API_Intro.Controllers
         }
 
         [HttpPut]
-        public IHttpActionResult FullUpdate(int id, BeerUpdate beer)
+        [HttpPatch]
+        public IHttpActionResult Update(int id, Beer beer)
         {
             if(BeerService.Instance.Get(id) == null)
                 return NotFound();
 
-            Beer beerUpdate = new Beer()
-            {
-                Name = beer.Name,
-                Brewery = beer.Brewery,
-                Color = beer.Color,
-                Degree = beer.Degree
-            };
+            BeerService.Instance.Update(id, beer);
 
-            BeerService.Instance.Update(id, beerUpdate);
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        [HttpPatch]
-        public IHttpActionResult PartialUpdate(int id, BeerUpdatePartial beer)
-        {
-            Beer beerDB = BeerService.Instance.Get(id);
-
-            if (beerDB== null)
-                return NotFound();
-
-            Beer beerUpdate = new Beer()
-            {
-                Name = beer.Name ?? beerDB.Name,
-                Brewery = beer.Brewery ?? beerDB.Brewery,
-                Color = beer.Color ?? beerDB.Color,
-                Degree = beer.Degree ?? beerDB.Degree
-            };
-
-            BeerService.Instance.Update(id, beerUpdate);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -100,4 +72,5 @@ namespace Demo_API_Intro.Controllers
             return NotFound();
         }
     }
+    */
 }

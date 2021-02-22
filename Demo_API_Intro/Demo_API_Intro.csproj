@@ -83,8 +83,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\BeerController - Base.cs" />
+    <Compile Include="Controllers\BeerController - 01 Base.cs" />
     <Compile Include="Controllers\BeerController.cs" />
+    <Compile Include="Controllers\BeerController - 02 Intro.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

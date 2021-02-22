@@ -14,4 +14,20 @@ namespace Demo_API_Intro.Models
         public string Color { get; set; }
         //public IEnumerable<Category> Categories { get; set; }
     }
+
+
+    public class BeerUpdate
+    {
+        public string Name { get; set; }
+        public double Degree { get; set; }
+        public string Brewery { get; set; }
+        public string Color { get; set; }
+    }
+    public class BeerUpdatePartial
+    {
+        public string Name { get; set; }
+        public double? Degree { get; set; }
+        public string Brewery { get; set; }
+        public string Color { get; set; }
+    }
 }
