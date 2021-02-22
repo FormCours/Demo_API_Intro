@@ -34,7 +34,7 @@ namespace Demo_API_Intro.Controllers
 
 
         [HttpPost]
-        public IHttpActionResult InsertCategory(Category category)
+        public IHttpActionResult InsertCategory(CategoryData category)
         {
             Category categoryAlreadyExists = CategoryService.Instance.GetAll()
                 .FirstOrDefault(c => c.Name.Trim().ToLower() == category.Name.Trim().ToLower());
@@ -44,20 +44,30 @@ namespace Demo_API_Intro.Controllers
                 return BadRequest($"Category {category.Name} already exists!");
             }
 
-            Category categorySave = CategoryService.Instance.Insert(category);
+            Category categoryInsert = new Category()
+            {
+                Name = category.Name
+            };
+
+            Category categorySave = CategoryService.Instance.Insert(categoryInsert);
             return Json(categorySave);
         }
 
 
         [HttpPut, HttpPatch]
-        public IHttpActionResult UpdateCategory(int id, Category category)
+        public IHttpActionResult UpdateCategory(int id, CategoryData category)
         {
             if(CategoryService.Instance.Get(id) == null)
             {
                 return NotFound();
             }
 
-            CategoryService.Instance.Update(id, category);
+            Category categoryUpdate = new Category()
+            {
+                Name = category.Name
+            };
+
+            CategoryService.Instance.Update(id, categoryUpdate);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
