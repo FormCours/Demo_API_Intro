@@ -9,6 +9,7 @@ using System.Web.Http;
 
 namespace Demo_API_Intro.Controllers
 {
+    [RoutePrefix("api/Beer")]
     public class BeerController : ApiController
     {
         // Comportement naturel du routing en fonction du Protocol, le nom de l'action doit commencer par : 
@@ -25,14 +26,14 @@ namespace Demo_API_Intro.Controllers
         // Bonne pratique : Renvoyer des "IHttpActionResult" avec le type de retour adapté.
 
         [HttpGet]
-        public IHttpActionResult GetAll()
+        public IHttpActionResult FindAll()
         {
             IEnumerable<Beer> beers = BeerService.Instance.GetAll();
 
             return Json(beers);
         }
 
-        [HttpGet] 
+        [HttpGet]
         public IHttpActionResult FindBeerById(int id)
         {
             Beer beer = BeerService.Instance.Get(id);
@@ -43,18 +44,60 @@ namespace Demo_API_Intro.Controllers
             return Json(beer);
         }
 
-        [HttpPost]
-        public IHttpActionResult Insert(Beer beer)
-        {
-            Beer beerDB = BeerService.Instance.Insert(beer);
 
+        [HttpGet]
+        [Route("GetByCategories")]
+        public IHttpActionResult FindBeerByCategories([FromUri] string[] categories)
+        {
+            IEnumerable<string> categoriesSearch = categories.Select(s => s.ToLower());
+
+            IEnumerable<Beer> result = BeerService.Instance.GetAll()
+                .Where(b => b.Categories.Any(c => categoriesSearch.Contains(c.Name.ToLower())));
+
+            return Json(result);
+        }
+
+
+        [HttpPost]
+        public IHttpActionResult Insert(BeerData beer)
+        {
+            // Gestion des categories de biere
+            List<Category> categoriesInsert = new List<Category>();
+
+            if (beer.Categories != null)
+            {
+                IEnumerable<Category> categories = CategoryService.Instance.GetAll();
+
+                foreach (CategoryData categoryData in beer.Categories)
+                {
+                    Category category = categories.SingleOrDefault(c => c.Name.Trim().ToLower() == categoryData.Name.Trim().ToLower());
+                    if (category == null)
+                    {
+                        category = CategoryService.Instance.Insert(new Category() { Name = categoryData.Name });
+                    }
+                    categoriesInsert.Add(category);
+                }
+            }
+
+            // Mapping de la biere
+            Beer beerInsert = new Beer()
+            {
+                Name = beer.Name,
+                Brewery = beer.Brewery,
+                Color = beer.Color,
+                Degree = beer.Degree,
+                Categories = categoriesInsert
+            };
+
+            // Ajout de la biere en DB
+            Beer beerDB = BeerService.Instance.Insert(beerInsert);
             return Json(beerDB);
         }
 
         [HttpPut]
         public IHttpActionResult FullUpdate(int id, BeerUpdate beer)
         {
-            if(BeerService.Instance.Get(id) == null)
+            if (BeerService.Instance.Get(id) == null)
                 return NotFound();
 
             Beer beerUpdate = new Beer()
@@ -74,7 +117,7 @@ namespace Demo_API_Intro.Controllers
         {
             Beer beerDB = BeerService.Instance.Get(id);
 
-            if (beerDB== null)
+            if (beerDB == null)
                 return NotFound();
 
             Beer beerUpdate = new Beer()
@@ -94,10 +137,55 @@ namespace Demo_API_Intro.Controllers
         {
             bool isOk = BeerService.Instance.Delete(id);
 
-            if(isOk)
+            if (isOk)
                 return Ok();
 
             return NotFound();
+        }
+
+
+
+        [HttpPost]
+        [Route("{id}/AddCategory/{idCategory}")]
+        public IHttpActionResult AddCategory(int id, int idCategory)
+        {
+            Beer beer = BeerService.Instance.Get(id);
+
+            if (beer == null)
+                return BadRequest($"The beer '{id}' dont exists !");
+
+            Category categoryAdd = CategoryService.Instance.GetAll().SingleOrDefault(c => c.Id == idCategory);
+
+            if (categoryAdd == null)
+                return BadRequest($"The category '{idCategory}' dont exists !");
+
+            if (beer.Categories.Any(c => c.Id == categoryAdd.Id))
+                return BadRequest($"The category '{idCategory}' is already add'");
+
+
+            ((List<Category>)beer.Categories).Add(categoryAdd);
+            return Json(beer);
+        }
+
+        [HttpPost]
+        [Route("{id}/RemoveCategory/{idCategory}")]
+        public IHttpActionResult RemoveCategory(int id, int idCategory)
+        {
+            Beer beer = BeerService.Instance.Get(id);
+
+            if (beer == null)
+                return BadRequest($"The beer '{id}' dont exists !");
+
+            Category categoryRemove = CategoryService.Instance.GetAll().SingleOrDefault(c => c.Id == idCategory);
+
+            if (categoryRemove == null)
+                return BadRequest($"The category '{idCategory}' dont exists !");
+
+            if (!beer.Categories.Any(c => c.Id == categoryRemove.Id))
+                return BadRequest($"The category '{idCategory}' is not add'");
+
+            ((List<Category>)beer.Categories).RemoveAll(c => c.Id == categoryRemove.Id);
+            return Json(beer);
         }
     }
 }
